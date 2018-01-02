@@ -211,7 +211,7 @@ add_model_variables <- function(pbp_df) {
                            No_Huddle_Ind = as.numeric(grepl("No Huddle", desc)),
                            Home_Ind = ifelse(posteam == HomeTeam, 1, 0),
                            airEPA_Result = ifelse(Reception == 1, airEPA, EPA),
-                           yac_EPA_Result = ifelse(Reception == 1, yacEPA, EPA),
+                           yacEPA_Result = ifelse(Reception == 1, yacEPA, EPA),
                            RunGap = ifelse(RunLocation == "middle", "center", RunGap),
                            Team_Side_Gap = paste(posteam, RunLocation, RunGap, sep = "-")) %>%
     return
@@ -236,19 +236,19 @@ prepare_model_data <- function(pbp_df) {
                                           !is.na(airEPA_Result),
                                           !is.na(yacEPA_Result),
                                           !is.na(PassLocation),
-                                          !is.na(Receiver_Position_Fill),
-                                          !is.na(Passer_Position_Fill),
+                                          !is.na(Receiver_Position),
+                                          !is.na(Passer_Position),
                                           !is.na(Passer_ID_Name),
                                           !is.na(Receiver_ID_Name),
                                           Receiver_ID != "None",
                                           Passer_ID != "None",
-                                          Passer_Position_Fill == "QB",
-                                          Receiver_Position_Fill != "QB")
+                                          Passer_Position == "QB",
+                                          Receiver_Position != "QB")
 
   rush_pbp_df <- pbp_df %>% dplyr::filter(PlayType %in% c("Run","Sack"),
                                           !is.na(EPA),
                                           !is.na(Team_Side_Gap),
-                                          !is.na(Rusher_Position_Fill),
+                                          !is.na(Rusher_Position),
                                           !is.na(Rusher_ID_Name))
 
   return(list("pass_model_df" = pass_pbp_df,
