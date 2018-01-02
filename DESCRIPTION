@@ -1,10 +1,19 @@
 Package: nflWAR
-Title: What the Package Does (one line, title case)
+Title: Computes WAR for Offensive Players in the NFL
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-Depends: R (>= 3.4.0)
+Authors@R: person("Ron", "Yurko", email = "ryurko21@gmail.com", role = c("aut", "cre"))
+Maintainer: Ron Yurko <ryurko21@gmail.com>
+Description: Using publicly available data with nflscrapR, this packages computes
+    WAR for offensive position players in the NFL.
+Depends: R (>= 3.4.0),
+         magrittr
+Imports: dplyr,
+         purrr,
+         readr,
+         nflscrapR
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat
+Remotes: maksimhorowitz/nflscrapR
+RoxygenNote: 6.0.1
