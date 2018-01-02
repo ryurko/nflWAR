@@ -197,7 +197,9 @@ add_positions <- function(pbp_df, years) {
 #' \item{"No_Huddle_Ind"} - Indicator whether or not the play was no huddle.
 #' \item{"Home_Ind"} - Indicator whether or not the possession team was home.
 #' \item{"airEPA_Result"} - airEPA for complete passes and EPA for incomplete.
+#' \item{"airWPA_Result"} - airWPA for complete passes and WPA for incomplete.
 #' \item{"yacEPA_Result"} - yacEPA for complete passes and EPA for incomplete.
+#' \item{"yacWPA_Result"} - yacWPA for complete passes and WPA for incomplete.
 #' \item{"Team_Side_Gap"} - Combine the team, side, and run gap for O-line proxy
 #' }
 #' @examples
@@ -211,7 +213,9 @@ add_model_variables <- function(pbp_df) {
                            No_Huddle_Ind = as.numeric(grepl("No Huddle", desc)),
                            Home_Ind = ifelse(posteam == HomeTeam, 1, 0),
                            airEPA_Result = ifelse(Reception == 1, airEPA, EPA),
+                           airWPA_Result = ifelse(Reception == 1, airWPA, WPA),
                            yacEPA_Result = ifelse(Reception == 1, yacEPA, EPA),
+                           yacWPA_Result = ifelse(Reception == 1, yacWPA, WPA),
                            RunGap = ifelse(RunLocation == "middle", "center", RunGap),
                            Team_Side_Gap = paste(posteam, RunLocation, RunGap, sep = "-")) %>%
     return
@@ -234,7 +238,9 @@ prepare_model_data <- function(pbp_df) {
   # with EPA calculations:
   pass_pbp_df <- pbp_df %>% dplyr::filter(PlayType == "Pass",
                                           !is.na(airEPA_Result),
+                                          !is.na(airWPA_Result),
                                           !is.na(yacEPA_Result),
+                                          !is.na(yacWPA_Result),
                                           !is.na(PassLocation),
                                           !is.na(Receiver_Position),
                                           !is.na(Passer_Position),
@@ -247,6 +253,7 @@ prepare_model_data <- function(pbp_df) {
 
   rush_pbp_df <- pbp_df %>% dplyr::filter(PlayType %in% c("Run","Sack"),
                                           !is.na(EPA),
+                                          !is.na(WPA),
                                           !is.na(Team_Side_Gap),
                                           !is.na(Rusher_Position),
                                           !is.na(Rusher_ID_Name))
@@ -255,3 +262,62 @@ prepare_model_data <- function(pbp_df) {
               "rush_model_df" = rush_pbp_df))
 }
 
+#' Creates Summary of Team Games
+#'
+#' @param years Single number or vector of years to get team rosters for.
+#' @return Data frame with a row every team's record and score differential
+#' in each of the given years.
+#' @examples
+#' # Summary of team performances in 2009:
+#' season_summary_09 <- get_season_summary(2009)
+#' @export
+
+get_season_summary <- function(years) {
+  # Create a data frame with the games data frames for the
+  # given years from the nflscrapR-data repository:
+  games_df <- purrr::map_dfr(years, function(x) {
+    suppressMessages(readr::read_csv(paste("https://raw.github.com/ryurko/nflscrapR-data/master/data/season_games/games_",
+                                           x, ".csv", sep = "")))
+  })
+
+  # Create a column, Winner for the games_data, that allows for tied games,
+  # as well as score differential columns for both home and away:
+  games_df <- games_df %>% dplyr::mutate(Winner = ifelse(homescore > awayscore,
+                                                         home, ifelse(homescore < awayscore,
+                                                               away, "TIE")),
+                                         homescore_diff = homescore - awayscore,
+                                         awayscore_diff = awayscore - homescore)
+
+  # Now create two datasets, one where it's just the teams and winner,
+  # the other with the scores, and gather so home and away are two rows
+  # rather than two columns - to then join back together:
+
+  games_team_df <- games_df %>%
+    dplyr::select(GameID, home, away, Season, Winner) %>%
+    tidyr::gather(Team_Loc,Team, -GameID, -Season, - Winner) %>%
+    dplyr::arrange(GameID)
+
+  games_score_df <- games_df %>%
+    dplyr::select(GameID, homescore_diff, awayscore_diff, Season, Winner) %>%
+    tidyr::gather(Team_Loc,Score_Diff, -GameID, -Season, - Winner) %>%
+    dplyr::arrange(GameID) %>%
+    dplyr::mutate(Team_Loc = ifelse(Team_Loc == "homescore_diff",
+                                    "home", "away"))
+
+  # Join together, create an indicator column for the winner:
+  games_team_score_df <- games_team_df %>%
+    dplyr::left_join(games_score_df,by = c("GameID","Season","Winner","Team_Loc")) %>%
+    dplyr::mutate(Win_Ind = ifelse(Team == Winner, 1, 0))
+
+  # Check to see if any of the plays are in 2016,
+  # if so then change JAC to JAX for both sides of the ball:
+  if (any(games_team_score_df$Season == 2016)) {
+    games_team_score_df$Team[which(games_team_score_df$Team == "JAC" & games_team_score_df$Season == 2016)] <- "JAX"
+  }
+
+  # Group by the Season and Team columns to generate the dataframe for the analysis:
+  season_team_summary <- games_team_score_df %>%
+    dplyr::group_by(Season, Team) %>%
+    dplyr::summarise(Wins = sum(Win_Ind), Total_Score_Diff = sum(Score_Diff)) %>%
+    return
+}

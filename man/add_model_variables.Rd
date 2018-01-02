@@ -16,7 +16,9 @@ Play-by-play data frame with the following columns added:
 \item{"No_Huddle_Ind"} - Indicator whether or not the play was no huddle.
 \item{"Home_Ind"} - Indicator whether or not the possession team was home.
 \item{"airEPA_Result"} - airEPA for complete passes and EPA for incomplete.
+\item{"airWPA_Result"} - airWPA for complete passes and WPA for incomplete.
 \item{"yacEPA_Result"} - yacEPA for complete passes and EPA for incomplete.
+\item{"yacWPA_Result"} - yacWPA for complete passes and WPA for incomplete.
 \item{"Team_Side_Gap"} - Combine the team, side, and run gap for O-line proxy
 }
 }

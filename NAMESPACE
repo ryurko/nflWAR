@@ -3,4 +3,5 @@
 export(add_model_variables)
 export(add_positions)
 export(get_pbp_data)
+export(get_season_summary)
 export(prepare_model_data)
