@@ -54,7 +54,7 @@ add_positions <- function(pbp_df, years) {
     return(result)
   }
 
-  # Create a table of passer names:
+    # Create a table of passer names:
   passer_names <- pbp_df %>% dplyr::group_by(Passer_ID) %>%
     dplyr::summarise(Passer_Name = find_player_name(Passer[which(!is.na(Passer))])) %>%
     dplyr::ungroup()
@@ -74,7 +74,7 @@ add_positions <- function(pbp_df, years) {
     dplyr::left_join(receiver_names, by="Receiver_ID") %>%
     dplyr::left_join(rusher_names, by="Rusher_ID")
 
-  # Create Passer_ID_Name and Receiver_ID_Name columns joining the two together:
+    # Create Passer_ID_Name and Receiver_ID_Name columns joining the two together:
   pbp_df <- pbp_df %>% dplyr::mutate(Passer_ID_Name = paste(Passer_Name,Passer_ID,sep="-"),
                                      Receiver_ID_Name = paste(Receiver_Name,Receiver_ID,sep="-"),
                                      Rusher_ID_Name = paste(Rusher_Name,Rusher_ID,sep="-"))
@@ -144,10 +144,22 @@ add_positions <- function(pbp_df, years) {
                             "Rusher"="name",
                             "Season"))
 
-  # Rename again to join without matching the team:
-  passer_pos <- passer_pos %>% dplyr::rename(Passer_Position_3=Passer_Position_2)
-  receiver_pos <- receiver_pos %>% dplyr::rename(Receiver_Position_3=Receiver_Position_2)
-  rusher_pos <- rusher_pos %>% dplyr::rename(Rusher_Position_3=Rusher_Position_2)
+  # Rename again to join without matching the team, selecting only the
+  # name, Season, and the first available position:
+  passer_pos <- passer_pos %>%
+    dplyr::group_by(name, Season) %>%
+    dplyr::summarise(Passer_Position_3 = first(Passer_Position_2))
+  receiver_pos <- receiver_pos %>%
+    dplyr::group_by(name, Season) %>%
+    dplyr::summarise(Receiver_Position_3 = first(Receiver_Position_2))
+  rusher_pos <- rusher_pos %>%
+    dplyr::group_by(name, Season) %>%
+    dplyr::summarise(Rusher_Position_3 = first(Rusher_Position_2))
+
+  # (THIS IS RISKY AND WOULD BE ELIMINATED WITH
+  # PLAYER IDS ON THE POSITION TABLES BUT IS THE ONLY WAY
+  # RIGHT NOW TO GET PLAYERS THAT ARE TRADED DURING A SEASON -
+  # AKA RECORD LINKAGE PROBLEM!!!):
 
   # Left join the position columns based on the player's name from the play-by-play:
   pbp_df <- pbp_df %>%
@@ -162,23 +174,22 @@ add_positions <- function(pbp_df, years) {
                             "Season"))
 
   # Now choose which one to use based on which is not NA:
-  pbp_df$Passer_Position <- ifelse(!is.na(pbp_df$Passer_Position_1),
-                                   pbp_df$Passer_Position_1,
-                                   ifelse(!is.na(pbp_df$Passer_Position_2),
-                                          pbp_df$Passer_Position_2,
-                                          pbp_df$Passer_Position_3))
-
-  pbp_df$Receiver_Position <- ifelse(!is.na(pbp_df$Receiver_Position_1),
-                                     pbp_df$Receiver_Position_1,
-                                     ifelse(!is.na(pbp_df$Receiver_Position_2),
-                                            pbp_df$Receiver_Position_2,
-                                            pbp_df$Receiver_Position_3))
-
-  pbp_df$Rusher_Position <- ifelse(!is.na(pbp_df$Rusher_Position_1),
-                                   pbp_df$Rusher_Position_1,
-                                   ifelse(!is.na(pbp_df$Rusher_Position_2),
-                                          pbp_df$Rusher_Position_2,
-                                          pbp_df$Rusher_Position_3))
+  pbp_df <- pbp_df %>%
+    dplyr::mutate(Passer_Position = ifelse(!is.na(Passer_Position_1),
+                                           Passer_Position_1,
+                                           ifelse(!is.na(Passer_Position_2),
+                                                  Passer_Position_2,
+                                                  Passer_Position_3)),
+                  Receiver_Position = ifelse(!is.na(Receiver_Position_1),
+                                              Receiver_Position_1,
+                                              ifelse(!is.na(Receiver_Position_2),
+                                                     Receiver_Position_2,
+                                                     Receiver_Position_3)),
+                  Rusher_Position = ifelse(!is.na(Rusher_Position_1),
+                                            Rusher_Position_1,
+                                            ifelse(!is.na(Rusher_Position_2),
+                                                   Rusher_Position_2,
+                                                   Rusher_Position_3)))
 
   # Drop the unnecessary columns and return:
   pbp_df %>% dplyr::select(-Rusher_Position_1, -Rusher_Position_2, -Rusher_Position_3,
