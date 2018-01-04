@@ -74,7 +74,7 @@ add_positions <- function(pbp_df, years) {
     dplyr::left_join(receiver_names, by="Receiver_ID") %>%
     dplyr::left_join(rusher_names, by="Rusher_ID")
 
-    # Create Passer_ID_Name and Receiver_ID_Name columns joining the two together:
+  # Create Passer_ID_Name and Receiver_ID_Name columns joining the two together:
   pbp_df <- pbp_df %>% dplyr::mutate(Passer_ID_Name = paste(Passer_Name,Passer_ID,sep="-"),
                                      Receiver_ID_Name = paste(Receiver_Name,Receiver_ID,sep="-"),
                                      Rusher_ID_Name = paste(Rusher_Name,Rusher_ID,sep="-"))
@@ -94,108 +94,33 @@ add_positions <- function(pbp_df, years) {
                                   pbp_df$Passer_ID_Name,
                                   pbp_df$Rusher_ID_Name)
 
-  # Create a data frame with the team rosters for the given years
-  # and then filter down to only the offense skill positions,
-  # selecting the necessary columns:
-  team_rosters <- purrr::map_dfr(years, function(x) {
+  # Create a data frame with the rosters for the given years
+  # (which are already filtered down to only the offense skill positions),
+  # selecting only the position and ID columns:
+  player_positions <- purrr::map_dfr(years, function(x) {
     suppressMessages(readr::read_csv(paste("https://raw.github.com/ryurko/nflscrapR-data/master/data/team_rosters/team_",
                                            x, "_rosters.csv", sep = "")))
     }) %>%
-    dplyr::filter(Pos %in% c("TE","FB","WR","RB","QB")) %>%
-    dplyr::select(name, Season, Team, Pos)
+    dplyr::select(GSIS_ID, Pos) %>%
+    dplyr::distinct()
 
   # Make three versions of the rosters for each type of player:
-  passer_pos <- team_rosters %>% dplyr::rename(Passer_Position_1=Pos) %>% dplyr::distinct()
-  receiver_pos <- team_rosters %>% dplyr::rename(Receiver_Position_1=Pos) %>% dplyr::distinct()
-  rusher_pos <- team_rosters %>% dplyr::rename(Rusher_Position_1=Pos) %>% dplyr::distinct()
+  passer_pos <- player_positions %>% dplyr::rename(Passer_Position=Pos)
+  receiver_pos <- player_positions %>% dplyr::rename(Receiver_Position=Pos)
+  rusher_pos <- player_positions %>% dplyr::rename(Rusher_Position=Pos)
 
-  # Left join the position columns based on the player's name, team, and current season:
+  # Left join the position columns based on the respective ID columns:
   pbp_df <- pbp_df %>%
             dplyr::left_join(passer_pos,
-                             by = c("posteam"="Team",
-                                    "Passer_Name"="name",
-                                    "Season")) %>%
+                             by = c("Passer_ID" = "GSIS_ID")) %>%
             dplyr::left_join(receiver_pos,
-                             by = c("posteam"="Team",
-                                    "Receiver_Name"="name",
-                                    "Season")) %>%
+                             by = c("Receiver_ID" = "GSIS_ID")) %>%
             dplyr::left_join(rusher_pos,
-                             by = c("posteam"="Team",
-                                    "Rusher_Name"="name",
-                                    "Season"))
+                             by = c("Rusher_ID" = "GSIS_ID"))
 
-  # Rename the position table position columns for joining again on a different column:
-  passer_pos <- passer_pos %>% dplyr::rename(Passer_Position_2=Passer_Position_1)
-  receiver_pos <- receiver_pos %>% dplyr::rename(Receiver_Position_2=Receiver_Position_1)
-  rusher_pos <- rusher_pos %>% dplyr::rename(Rusher_Position_2=Rusher_Position_1)
-
-  # Left join the position columns based on the player's name from the play-by-play:
-  pbp_df <- pbp_df %>%
-    dplyr::left_join(passer_pos,
-                     by = c("posteam"="Team",
-                            "Passer"="name",
-                            "Season")) %>%
-    dplyr::left_join(receiver_pos,
-                     by = c("posteam"="Team",
-                            "Receiver"="name",
-                            "Season")) %>%
-    dplyr::left_join(rusher_pos,
-                     by = c("posteam"="Team",
-                            "Rusher"="name",
-                            "Season"))
-
-  # Rename again to join without matching the team, selecting only the
-  # name, Season, and the first available position:
-  passer_pos <- passer_pos %>%
-    dplyr::group_by(name, Season) %>%
-    dplyr::summarise(Passer_Position_3 = first(Passer_Position_2))
-  receiver_pos <- receiver_pos %>%
-    dplyr::group_by(name, Season) %>%
-    dplyr::summarise(Receiver_Position_3 = first(Receiver_Position_2))
-  rusher_pos <- rusher_pos %>%
-    dplyr::group_by(name, Season) %>%
-    dplyr::summarise(Rusher_Position_3 = first(Rusher_Position_2))
-
-  # (THIS IS RISKY AND WOULD BE ELIMINATED WITH
-  # PLAYER IDS ON THE POSITION TABLES BUT IS THE ONLY WAY
-  # RIGHT NOW TO GET PLAYERS THAT ARE TRADED DURING A SEASON -
-  # AKA RECORD LINKAGE PROBLEM!!!):
-
-  # Left join the position columns based on the player's name from the play-by-play:
-  pbp_df <- pbp_df %>%
-    dplyr::left_join(passer_pos,
-                     by = c("Passer"="name",
-                            "Season")) %>%
-    dplyr::left_join(receiver_pos,
-                     by = c("Receiver"="name",
-                            "Season")) %>%
-    dplyr::left_join(rusher_pos,
-                     by = c("Rusher"="name",
-                            "Season"))
-
-  # Now choose which one to use based on which is not NA:
-  pbp_df <- pbp_df %>%
-    dplyr::mutate(Passer_Position = ifelse(!is.na(Passer_Position_1),
-                                           Passer_Position_1,
-                                           ifelse(!is.na(Passer_Position_2),
-                                                  Passer_Position_2,
-                                                  Passer_Position_3)),
-                  Receiver_Position = ifelse(!is.na(Receiver_Position_1),
-                                              Receiver_Position_1,
-                                              ifelse(!is.na(Receiver_Position_2),
-                                                     Receiver_Position_2,
-                                                     Receiver_Position_3)),
-                  Rusher_Position = ifelse(!is.na(Rusher_Position_1),
-                                            Rusher_Position_1,
-                                            ifelse(!is.na(Rusher_Position_2),
-                                                   Rusher_Position_2,
-                                                   Rusher_Position_3)))
 
   # Drop the unnecessary columns and return:
-  pbp_df %>% dplyr::select(-Rusher_Position_1, -Rusher_Position_2, -Rusher_Position_3,
-                           -Passer_Position_1, -Passer_Position_2, -Passer_Position_3,
-                           -Receiver_Position_1, -Receiver_Position_2, -Receiver_Position_3,
-                           -Passer_Name, -Receiver_Name, -Rusher_Name) %>%
+  pbp_df %>% dplyr::select(-Passer_Name, -Receiver_Name, -Rusher_Name) %>%
     return
 }
 
@@ -267,7 +192,8 @@ prepare_model_data <- function(pbp_df) {
                                           !is.na(WPA),
                                           !is.na(Team_Side_Gap),
                                           !is.na(Rusher_Position),
-                                          !is.na(Rusher_ID_Name))
+                                          !is.na(Rusher_ID_Name),
+                                          Rusher_ID != "None")
 
   return(list("pass_model_df" = pass_pbp_df,
               "rush_model_df" = rush_pbp_df))
