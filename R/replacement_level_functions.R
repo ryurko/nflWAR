@@ -152,7 +152,7 @@ add_position_tables <- function(model_data_list) {
 #' @examples
 #' # Find positional replacement level:
 #' model_data_list <- model_data_list %>%
-#' find_positional_replacement_level(replacement_functions)
+#'   find_positional_replacement_level(replacement_functions)
 #' @export
 
 find_positional_replacement_level <- function(model_data_list,
@@ -183,20 +183,41 @@ find_positional_replacement_level <- function(model_data_list,
     dplyr::mutate(Rusher_ID_Name = ifelse(Rusher_ID_Name %in% replacement_RBs_rush,
                                             "Replacement_RB_rush",
                                             ifelse(Rusher_ID_Name %in% replacement_WR_TE_rush,
-                                                   "Replacement_WR_TE_rush", Rusher_ID_Name)))
+                                                   "Replacement_WR_TE_rush",
+                                                   ifelse(Rusher_ID_Name %in% replacement_QBs,
+                                                          "Replacement_QB",Rusher_ID_Name))))
 
-  # Create the Replacement_Level indicator columns each in positional table:
+  # Create the Replacement_Level indicator columns each in positional table,
+  # as well as a column that will be used to join the player effects from the model
+  # later on for replacement level (Player_Model_ID):
   model_data_list$QB_table <- model_data_list$QB_table %>%
-    dplyr::mutate(Replacement_Level = ifelse(Player_ID_Name %in% replacement_QBs, 1, 0))
+    dplyr::mutate(Replacement_Level = ifelse(Player_ID_Name %in% replacement_QBs, 1, 0),
+                  Player_Model_ID = ifelse(Replacement_Level == 1, "Replacement_QB",
+                                           Player_ID_Name))
+
   model_data_list$RB_table <- model_data_list$RB_table %>%
     dplyr::mutate(Replacement_Level_Rusher = ifelse(Player_ID_Name %in% replacement_RBs_rush, 1, 0),
-           Replacement_Level_Receiver = ifelse(Player_ID_Name %in% replacement_RBs_rec, 1, 0))
+           Replacement_Level_Receiver = ifelse(Player_ID_Name %in% replacement_RBs_rec, 1, 0),
+           Player_Model_ID_Rush = ifelse(Replacement_Level_Rusher == 1, "Replacement_RB_rush",
+                                    Player_ID_Name),
+           Player_Model_ID_Rec = ifelse(Replacement_Level_Receiver == 1, "Replacement_RB_rec",
+                                    Player_ID_Name))
+
   model_data_list$WR_table <- model_data_list$WR_table %>%
     dplyr::mutate(Replacement_Level_Receiver = ifelse(Player_ID_Name %in% replacement_WRs_rec, 1, 0),
-           Replacement_Level_Rusher = ifelse(Player_ID_Name %in% replacement_WR_TE_rush, 1, 0))
+           Replacement_Level_Rusher = ifelse(Player_ID_Name %in% replacement_WR_TE_rush, 1, 0),
+           Player_Model_ID_Rec = ifelse(Replacement_Level_Receiver == 1, "Replacement_WR_rec",
+                                    Player_ID_Name),
+           Player_Model_ID_Rush = ifelse(Replacement_Level_Rusher == 1, "Replacement_WR_TE_rush",
+                                         Player_ID_Name))
+
   model_data_list$TE_table <- model_data_list$TE_table %>%
     dplyr::mutate(Replacement_Level_Receiver = ifelse(Player_ID_Name %in% replacement_TEs_rec, 1, 0),
-           Replacement_Level_Rusher = ifelse(Player_ID_Name %in% replacement_WR_TE_rush, 1, 0))
+           Replacement_Level_Rusher = ifelse(Player_ID_Name %in% replacement_WR_TE_rush, 1, 0),
+           Player_Model_ID_Rec = ifelse(Replacement_Level_Receiver == 1, "Replacement_TE_rec",
+                                        Player_ID_Name),
+           Player_Model_ID_Rush = ifelse(Replacement_Level_Rusher == 1, "Replacement_WR_TE_rush",
+                                         Player_ID_Name))
 
   # Return the updated data:
   return(model_data_list)
