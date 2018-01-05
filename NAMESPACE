@@ -3,6 +3,7 @@
 export(add_model_variables)
 export(add_position_tables)
 export(add_positions)
+export(calculate_above_replacement)
 export(create_roster_replacement_fn)
 export(estimate_passing_value_added)
 export(estimate_player_value_added)

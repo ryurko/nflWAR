@@ -273,10 +273,8 @@ estimate_rushing_value_added <- function(rush_pbp_df, qb_rush_formula, main_rush
 
 #' Simulate to Estimate Player Effects Variance and Intervals
 #'
-#' @param model_data_list List of data frames:
+#' @param model_data_list List that must have the following:
 #' \itemize{
-#' \item{"pass_model_df"} - Passing play-by-play data
-#' \item{"rush_model_df"} - Rushing play-by-play data
 #' \item{"QB_table"} - Table of QBs
 #' \item{"RB_table"} - Table of RBs
 #' \item{"WR_table"} - Table of WRs
@@ -342,8 +340,8 @@ simulate_player_value_added <- function(model_data_list, n_sim = 1000) {
                   Upper_yac_iPA = yac_iPA + (2 * Sim_yac_iPA_SD),
                   Lower_yac_iPAA = Pass_Attempts * Lower_yac_iPA,
                   Upper_yac_iPAA = Pass_Attempts * Upper_yac_iPA,
-                  Lower_rush_iPA = rush_iPA - (2 * Sim_air_iPA_SD),
-                  Upper_rush_iPA = rush_iPA + (2 * Sim_air_iPA_SD),
+                  Lower_rush_iPA = rush_iPA - (2 * Sim_rush_iPA_SD),
+                  Upper_rush_iPA = rush_iPA + (2 * Sim_rush_iPA_SD),
                   Lower_rush_iPAA = (Rush_Attempts + Sacks) * Lower_rush_iPA,
                   Upper_rush_iPAA = (Rush_Attempts + Sacks) * Upper_rush_iPA)
 
@@ -364,8 +362,8 @@ simulate_player_value_added <- function(model_data_list, n_sim = 1000) {
                   Upper_yac_iPA = yac_iPA + (2 * Sim_yac_iPA_SD),
                   Lower_yac_iPAA = Targets * Lower_yac_iPA,
                   Upper_yac_iPAA = Targets * Upper_yac_iPA,
-                  Lower_rush_iPA = rush_iPA - (2 * Sim_air_iPA_SD),
-                  Upper_rush_iPA = rush_iPA + (2 * Sim_air_iPA_SD),
+                  Lower_rush_iPA = rush_iPA - (2 * Sim_rush_iPA_SD),
+                  Upper_rush_iPA = rush_iPA + (2 * Sim_rush_iPA_SD),
                   Lower_rush_iPAA = Rush_Attempts * Lower_rush_iPA,
                   Upper_rush_iPAA = Rush_Attempts * Upper_rush_iPA)
 

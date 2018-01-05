@@ -7,10 +7,8 @@
 simulate_player_value_added(model_data_list, n_sim = 1000)
 }
 \arguments{
-\item{model_data_list}{List of data frames:
+\item{model_data_list}{List that must have the following:
 \itemize{
-\item{"pass_model_df"} - Passing play-by-play data
-\item{"rush_model_df"} - Rushing play-by-play data
 \item{"QB_table"} - Table of QBs
 \item{"RB_table"} - Table of RBs
 \item{"WR_table"} - Table of WRs
