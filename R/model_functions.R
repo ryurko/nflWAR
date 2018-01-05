@@ -75,29 +75,37 @@ estimate_player_value_added <- function(model_data_list, model_formula_list, wei
                   yac_iPAA = Pass_Attempts * yac_iPA,
                   rush_iPAA = (Rush_Attempts + Sacks) * rush_iPA)
 
-  # For RBs:
-  model_data_list$RB_table <- model_data_list$RB_table %>%
+  # Create the pipe function to generate the iPAA values for the RB, WR, and TE tables:
+  add_iPA_iPAA <- . %>%
     dplyr::left_join(player_passing_value_added$Rec_table, by = "Player_Model_ID_Rec") %>%
     dplyr::left_join(player_rushing_value_added$Rush_table, by = "Player_Model_ID_Rush") %>%
     dplyr::mutate(air_iPAA = Targets * air_iPA,
                   yac_iPAA = Targets * yac_iPA,
                   rush_iPAA = Rush_Attempts * rush_iPA)
+
+  # For RBs:
+  model_data_list$RB_table <- model_data_list$RB_table %>% add_iPA_iPAA
+    # dplyr::left_join(player_passing_value_added$Rec_table, by = "Player_Model_ID_Rec") %>%
+    # dplyr::left_join(player_rushing_value_added$Rush_table, by = "Player_Model_ID_Rush") %>%
+    # dplyr::mutate(air_iPAA = Targets * air_iPA,
+    #               yac_iPAA = Targets * yac_iPA,
+    #               rush_iPAA = Rush_Attempts * rush_iPA)
 
   # For WRs:
-  model_data_list$WR_table <- model_data_list$WR_table %>%
-    dplyr::left_join(player_passing_value_added$Rec_table, by = "Player_Model_ID_Rec") %>%
-    dplyr::left_join(player_rushing_value_added$Rush_table, by = "Player_Model_ID_Rush") %>%
-    dplyr::mutate(air_iPAA = Targets * air_iPA,
-                  yac_iPAA = Targets * yac_iPA,
-                  rush_iPAA = Rush_Attempts * rush_iPA)
+  model_data_list$WR_table <- model_data_list$WR_table %>% add_iPA_iPAA
+    # dplyr::left_join(player_passing_value_added$Rec_table, by = "Player_Model_ID_Rec") %>%
+    # dplyr::left_join(player_rushing_value_added$Rush_table, by = "Player_Model_ID_Rush") %>%
+    # dplyr::mutate(air_iPAA = Targets * air_iPA,
+    #               yac_iPAA = Targets * yac_iPA,
+    #               rush_iPAA = Rush_Attempts * rush_iPA)
 
   # For TEs:
-  model_data_list$TE_table <- model_data_list$TE_table %>%
-    dplyr::left_join(player_passing_value_added$Rec_table, by = "Player_Model_ID_Rec") %>%
-    dplyr::left_join(player_rushing_value_added$Rush_table, by = "Player_Model_ID_Rush") %>%
-    dplyr::mutate(air_iPAA = Targets * air_iPA,
-                  yac_iPAA = Targets * yac_iPA,
-                  rush_iPAA = Rush_Attempts * rush_iPA)
+  model_data_list$TE_table <- model_data_list$TE_table %>% add_iPA_iPAA
+    # dplyr::left_join(player_passing_value_added$Rec_table, by = "Player_Model_ID_Rec") %>%
+    # dplyr::left_join(player_rushing_value_added$Rush_table, by = "Player_Model_ID_Rush") %>%
+    # dplyr::mutate(air_iPAA = Targets * air_iPA,
+    #               yac_iPAA = Targets * yac_iPA,
+    #               rush_iPAA = Rush_Attempts * rush_iPA)
 
   # Return the updated model_data_list:
   return(append(model_data_list,
@@ -262,4 +270,119 @@ estimate_rushing_value_added <- function(rush_pbp_df, qb_rush_formula, main_rush
   return(list("qb_rush_model" = qb_mm_lmer, "main_rush_model" = main_rush_mm_lmer,
               "QB_table" = QB_table, "Rush_table" = Rush_table))
 }
+
+#' Simulate to Estimate Player Effects Variance and Intervals
+#'
+#' @param model_data_list List of data frames:
+#' \itemize{
+#' \item{"pass_model_df"} - Passing play-by-play data
+#' \item{"rush_model_df"} - Rushing play-by-play data
+#' \item{"QB_table"} - Table of QBs
+#' \item{"RB_table"} - Table of RBs
+#' \item{"WR_table"} - Table of WRs
+#' \item{"TE_table"} - Table of TEs
+#' \item{"air_model"} - Model fit for air component
+#' \item{"yac_model"} - Model fit for yac component
+#' \item{"qb_rush_model"} - Model fit for QB rushing/sacks
+#' \item{"main_rush_model"} - Model for for all non-QB rushing attempts
+#' }
+#' @param n_sim Number of simulations (default is 1000)
+#' @return The input model_data_list but with each position table
+#' modified so that upper/lower estimates for each iPA and iPAA
+#' value are estimated from +/- two standard deviations from
+#' the simulations.
+#' @examples
+#' # Simulate the player effects and get intervals for the iPA and iPAA values:
+#' model_data_list <- model_data_list %>%
+#'   simulate_player_value_added(model_data_list, n_sim = 1000)
+#' @export
+
+simulate_player_value_added <- function(model_data_list, n_sim = 1000) {
+
+  # Simulate the random effects for each of the models, filtering to only
+  # the random effects for players - then selecting the sd column, renaming
+  # the groupID and nesting based on the effect:
+  sim_air_effects <- merTools::REsim(model_data_list$air_model, n.sims = n_sim) %>%
+    dplyr::select(groupFctr, groupID, sd) %>%
+    dplyr::rename(Player_Model_ID = groupID, Sim_air_iPA_SD = sd) %>%
+    dplyr::group_by(groupFctr) %>%
+    tidyr::nest()
+  sim_yac_effects <- merTools::REsim(model_data_list$yac_model, n.sims = n_sim) %>%
+    dplyr::select(groupFctr, groupID, sd) %>%
+    dplyr::rename(Player_Model_ID = groupID, Sim_yac_iPA_SD = sd) %>%
+    dplyr::group_by(groupFctr) %>%
+    tidyr::nest()
+  sim_qb_rush_effects <- merTools::REsim(model_data_list$qb_rush_model, n.sims = n_sim) %>%
+    dplyr::select(groupFctr, groupID, sd) %>%
+    dplyr::rename(Player_Model_ID = groupID, Sim_rush_iPA_SD = sd) %>%
+    dplyr::group_by(groupFctr) %>%
+    tidyr::nest()
+  sim_main_rush_effects <- merTools::REsim(model_data_list$main_rush_model, n.sims = n_sim) %>%
+    dplyr::select(groupFctr, groupID, sd) %>%
+    dplyr::rename(Player_Model_ID_Rush = groupID, Sim_rush_iPA_SD = sd) %>%
+    dplyr::group_by(groupFctr) %>%
+    tidyr::nest()
+
+  # Now join the effects to their respective position tables, and generate the lower
+  # and upper bounds for the iPA and iPAA estimates.
+
+  # First for QBs:
+  model_data_list$QB_table <- model_data_list$QB_table %>%
+    dplyr::left_join(sim_air_effects$data[[which(sim_air_effects$groupFctr == "Passer_ID_Name")]],
+                     by = "Player_Model_ID") %>%
+    dplyr::left_join(sim_yac_effects$data[[which(sim_yac_effects$groupFctr == "Passer_ID_Name")]],
+                     by = "Player_Model_ID") %>%
+    dplyr::left_join(sim_qb_rush_effects$data[[which(sim_qb_rush_effects$groupFctr == "Rusher_ID_Name")]],
+                     by = "Player_Model_ID") %>%
+    dplyr::mutate(Lower_air_iPA = air_iPA - (2 * Sim_air_iPA_SD),
+                  Upper_air_iPA = air_iPA + (2 * Sim_air_iPA_SD),
+                  Lower_air_iPAA = Pass_Attempts * Lower_air_iPA,
+                  Upper_air_iPAA = Pass_Attempts * Upper_air_iPA,
+                  Lower_yac_iPA = yac_iPA - (2 * Sim_yac_iPA_SD),
+                  Upper_yac_iPA = yac_iPA + (2 * Sim_yac_iPA_SD),
+                  Lower_yac_iPAA = Pass_Attempts * Lower_yac_iPA,
+                  Upper_yac_iPAA = Pass_Attempts * Upper_yac_iPA,
+                  Lower_rush_iPA = rush_iPA - (2 * Sim_air_iPA_SD),
+                  Upper_rush_iPA = rush_iPA + (2 * Sim_air_iPA_SD),
+                  Lower_rush_iPAA = (Rush_Attempts + Sacks) * Lower_rush_iPA,
+                  Upper_rush_iPAA = (Rush_Attempts + Sacks) * Upper_rush_iPA)
+
+  # Create the pipe function to create the upper and lower bounds for the
+  # RB, WR, and TE positions:
+  add_bounds_columns <- . %>%
+    dplyr::left_join(sim_air_effects$data[[which(sim_air_effects$groupFctr == "Receiver_ID_Name")]],
+                     by = c("Player_Model_ID_Rec" = "Player_Model_ID")) %>%
+    dplyr::left_join(sim_yac_effects$data[[which(sim_yac_effects$groupFctr == "Receiver_ID_Name")]],
+                     by = c("Player_Model_ID_Rec" = "Player_Model_ID")) %>%
+    dplyr::left_join(sim_main_rush_effects$data[[which(sim_main_rush_effects$groupFctr == "Rusher_ID_Name")]],
+                     by = "Player_Model_ID_Rush") %>%
+    dplyr::mutate(Lower_air_iPA = air_iPA - (2 * Sim_air_iPA_SD),
+                  Upper_air_iPA = air_iPA + (2 * Sim_air_iPA_SD),
+                  Lower_air_iPAA = Targets * Lower_air_iPA,
+                  Upper_air_iPAA = Targets * Upper_air_iPA,
+                  Lower_yac_iPA = yac_iPA - (2 * Sim_yac_iPA_SD),
+                  Upper_yac_iPA = yac_iPA + (2 * Sim_yac_iPA_SD),
+                  Lower_yac_iPAA = Targets * Lower_yac_iPA,
+                  Upper_yac_iPAA = Targets * Upper_yac_iPA,
+                  Lower_rush_iPA = rush_iPA - (2 * Sim_air_iPA_SD),
+                  Upper_rush_iPA = rush_iPA + (2 * Sim_air_iPA_SD),
+                  Lower_rush_iPAA = Rush_Attempts * Lower_rush_iPA,
+                  Upper_rush_iPAA = Rush_Attempts * Upper_rush_iPA)
+
+
+  # RBs:
+  model_data_list$RB_table <- model_data_list$RB_table %>% add_bounds_columns
+
+  # WRs:
+  model_data_list$WR_table <- model_data_list$WR_table %>% add_bounds_columns
+
+  # TEs:
+  model_data_list$TE_table <- model_data_list$TE_table %>% add_bounds_columns
+
+
+  # Return the modified input:
+  return(model_data_list)
+}
+
+
 

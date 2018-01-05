@@ -12,6 +12,7 @@ Imports: dplyr,
          readr,
          tidyr,
          lme4,
+         merTools,
          nflscrapR
 License: What license is it under?
 Encoding: UTF-8
