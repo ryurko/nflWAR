@@ -4,7 +4,8 @@
 \alias{estimate_player_value_added}
 \title{Calculate the 3 Types iPA and iPAA Values for Each Player}
 \usage{
-estimate_player_value_added(model_data_list, model_formula_list, weight_type)
+estimate_player_value_added(model_data_list, model_formula_list,
+  return_models = 1)
 }
 \arguments{
 \item{model_data_list}{List of data frames:
@@ -25,12 +26,12 @@ estimate_player_value_added(model_data_list, model_formula_list, weight_type)
 \item{"main_rush_formula"} - Formula for non-QB rushing model.
 }}
 
-\item{weight_type}{String indicating which type of observation
-weighting to use, can either be: (1) "none" or (2) "scorediff".}
+\item{return_models}{Indicator for whether or not the models
+should be return in the list (default is yes, 1).}
 }
 \value{
-The input model_data_list but with each position table
-modified so that the following columns are included:
+Only return the original position tables from the input
+but modified so that the following columns are included:
 \itemize{
 \item{"air_iPA"} - Individual player points/probability added in the air.
 \item{"yac_iPA"} - Individual player points/probability added after the catch.

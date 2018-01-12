@@ -4,7 +4,7 @@
 \alias{estimate_passing_value_added}
 \title{Calculate Player Effects for Passing Plays}
 \usage{
-estimate_passing_value_added(pass_pbp_df, air_formula, yac_formula, weight_type)
+estimate_passing_value_added(pass_pbp_df, air_formula, yac_formula)
 }
 \arguments{
 \item{pass_pbp_df}{Play-by-play data set of passing plays.}
@@ -12,9 +12,6 @@ estimate_passing_value_added(pass_pbp_df, air_formula, yac_formula, weight_type)
 \item{air_formula}{Formula for the air based component.}
 
 \item{yac_formula}{Formula for the yac based component.}
-
-\item{weight_type}{String indicating which type of observation
-weighting to use, can either be: (1) "none" or (2) "scorediff".}
 }
 \value{
 List with the following:

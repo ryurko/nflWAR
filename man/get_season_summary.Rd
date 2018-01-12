@@ -7,7 +7,7 @@
 get_season_summary(years)
 }
 \arguments{
-\item{years}{Single number or vector of years to get team rosters for.}
+\item{years}{Single number or vector of years to get season summaries for.}
 }
 \value{
 Data frame with a row every team's record and score differential

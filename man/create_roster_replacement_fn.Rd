@@ -13,12 +13,12 @@ replacement level can at most be.}
 \item{positions}{String indicating which position(s) to find the replacement level for,
 can only be (1) "QB", (2) "RB", (3) "WR", (4) "TE", or (5) "FB".}
 
-\item{pbp_type}{String indicating which type of play-by-play data to use, either use
-(1) "pass" and (2) "rush".}
+\item{pbp_type}{String indicating which type of performance to use, either use
+(1) "pass" or (2) "rush".}
 }
 \value{
 Function that returns a vector of Player_ID_Name values indicating the
-replacement level for a given play-by-play dataset based on the roster_rank to
+replacement level for a given play-by-play dataset based on the replacement_depth to
 decide the team depth chart cutoff, as well as the position(s) to search for,
 and the type of the play-by-play data that will be used.
 }
@@ -27,7 +27,7 @@ Create a Function to Find Replacement Level Based on the Team's Depth
 }
 \examples{
 # Create the replacement function for QBs using based on 3rd or higher on the
-depth chart using the passing play-by-play data:
+depth chart using passing performance:
 find_replacement_QB <- create_roster_replacement_fn(3, "QB", "pass")
-replacement_QBs <- find_replacement_QB(model_data_list$pass_model_df)
+replacement_QBs <- find_replacement_QB(model_data_list)
 }

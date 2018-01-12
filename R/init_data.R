@@ -201,7 +201,7 @@ prepare_model_data <- function(pbp_df) {
 
 #' Creates Summary of Team Games
 #'
-#' @param years Single number or vector of years to get team rosters for.
+#' @param years Single number or vector of years to get season summaries for.
 #' @return Data frame with a row every team's record and score differential
 #' in each of the given years.
 #' @examples

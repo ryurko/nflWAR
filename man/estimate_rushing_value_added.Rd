@@ -4,8 +4,7 @@
 \alias{estimate_rushing_value_added}
 \title{Calculate Player Effects for Rushing Plays}
 \usage{
-estimate_rushing_value_added(rush_pbp_df, qb_rush_formula, main_rush_formula,
-  weight_type)
+estimate_rushing_value_added(rush_pbp_df, qb_rush_formula, main_rush_formula)
 }
 \arguments{
 \item{rush_pbp_df}{Play-by-play data set of passing plays.}
@@ -13,9 +12,6 @@ estimate_rushing_value_added(rush_pbp_df, qb_rush_formula, main_rush_formula,
 \item{qb_rush_formula}{Formula for QB rushing/sacks.}
 
 \item{main_rush_formula}{Formula for non-QB rushing.}
-
-\item{weight_type}{String indicating which type of observation
-weighting to use, can either be: (1) "none" or (2) "scorediff".}
 }
 \value{
 List with the following:
