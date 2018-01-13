@@ -24,16 +24,15 @@ resample_season <- function(pbp_data, drive_level = 0) {
 
     result <- purrr::map_dfr(teams, function(x) {
       # Sample from the team drives with replacement:
-      pbp_data %>%
+     pbp_data %>%
         dplyr::filter(posteam == x) %>%
         dplyr::group_by(Game_Drive) %>%
         tidyr::nest() %>%
-        dplyr::sample_n(size = nrow(.), replace = TRUE) %>%
+        dplyr::sample_frac(size = 1, replace = TRUE) %>%
         tidyr::unnest() %>%
         dplyr::ungroup()
-
     }) %>%
-      dplyr::select(-Game_Drive)
+     dplyr::select(-Game_Drive)
 
   } else {
 
