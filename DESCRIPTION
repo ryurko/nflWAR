@@ -11,8 +11,8 @@ Depends: R (>= 3.4.0),
 Imports: dplyr,
          purrr,
          readr,
-         tidyr,
          lme4,
+         tidyr,
          merTools,
          nflscrapR
 License: What license is it under?

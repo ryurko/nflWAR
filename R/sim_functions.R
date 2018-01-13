@@ -10,7 +10,7 @@
 
 resample_season <- function(pbp_data, drive_level = 0) {
   # Vector of the teams in the season:
-  teams <- unique(pbp_data$posteam)
+  teams <- na.omit(unique(pbp_data$posteam))
 
   # Check to see if the drive_level indicator is 1,
   # then resample entire drives, otherwise resample
@@ -24,18 +24,13 @@ resample_season <- function(pbp_data, drive_level = 0) {
 
     result <- purrr::map_dfr(teams, function(x) {
       # Sample from the team drives with replacement:
-      resample_team_drives <- pbp_data %>%
+      pbp_data %>%
         dplyr::filter(posteam == x) %>%
-        dplyr::select(Game_Drive) %>%
-        dplyr::distinct() %>%
+        dplyr::group_by(Game_Drive) %>%
+        tidyr::nest() %>%
         dplyr::sample_n(size = nrow(.), replace = TRUE) %>%
-        dplyr::pull()
-
-      team_sample <- resample_team_drives %>%
-        purrr::map_dfr(function(y){
-          pbp_data %>%
-            dplyr::filter(Game_Drive == y)
-        }) %>% return
+        tidyr::unnest() %>%
+        dplyr::ungroup()
 
     }) %>%
       dplyr::select(-Game_Drive)
