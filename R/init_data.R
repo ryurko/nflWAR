@@ -144,6 +144,7 @@ add_positions <- function(pbp_df, years) {
 #' @export
 
 add_model_variables <- function(pbp_df) {
+
   # Create the additional model variables and return:
   pbp_df %>% dplyr::mutate(Shotgun_Ind = as.numeric(grepl("Shotgun", desc)),
                            No_Huddle_Ind = as.numeric(grepl("No Huddle", desc)),
@@ -194,6 +195,36 @@ prepare_model_data <- function(pbp_df) {
                                           !is.na(Rusher_Position),
                                           !is.na(Rusher_ID_Name),
                                           Rusher_ID != "None")
+
+
+  # For each of these datasets, group by the posteam to calculate both
+  # passing and rushing EPA and WPA per attempt variables:
+
+  team_passing <- pass_pbp_df %>%
+    dplyr::group_by(posteam) %>%
+    dplyr::summarise(Pass_EPA = sum(EPA,na.rm=TRUE),
+                     Pass_WPA = sum(WPA, na.rm = TRUE),
+                     Pass_Attempts = n(),
+                     Pass_EPA_Att = Pass_EPA / Pass_Attempts,
+                     Pass_WPA_Att = Pass_WPA / Pass_Attempts)
+
+  team_rushing <- rush_pbp_df %>%
+    dplyr::group_by(posteam) %>%
+    dplyr::summarise(Rush_EPA = sum(EPA, na.rm = TRUE),
+              Rush_WPA = sum(WPA, na.rm = TRUE),
+              Rush_Attempts = n(),
+              Rush_EPA_Att = Rush_EPA / Rush_Attempts,
+              Rush_WPA_Att = Rush_WPA / Rush_Attempts)
+
+  # Left join these to the pbp_dfs:
+
+  pass_pbp_df <- pass_pbp_df %>%
+    dplyr::left_join(team_passing, by = "posteam") %>%
+    dplyr::left_join(team_rushing, by = "posteam")
+
+  rush_pbp_df <- rush_pbp_df %>%
+    dplyr::left_join(team_passing, by = "posteam") %>%
+    dplyr::left_join(team_rushing, by = "posteam")
 
   return(list("pass_model_df" = pass_pbp_df,
               "rush_model_df" = rush_pbp_df))

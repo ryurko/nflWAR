@@ -5,7 +5,7 @@ Authors@R: person("Ron", "Yurko", email = "ryurko21@gmail.com", role = c("aut", 
 Maintainer: Ron Yurko <ryurko21@gmail.com>
 Description: Using publicly available data with nflscrapR, this packages computes
     WAR for offensive position players in the NFL.
-Depends: R (>= 3.4.0),
+Depends: R (>= 3.3.1),
          magrittr,
          ggplot2
 Imports: dplyr,
@@ -14,7 +14,7 @@ Imports: dplyr,
          lme4,
          tidyr,
          merTools,
-         nflscrapR
+         sbgcop
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
