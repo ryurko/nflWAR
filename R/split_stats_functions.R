@@ -40,7 +40,8 @@ join_position_statistics <- function(model_data_list) {
     dplyr::left_join(passing_stats,
                      by = c("Player_ID_Name" = "Passer_ID_Name")) %>%
     dplyr::left_join(rushing_stats,
-                     by = c("Player_ID_Name" = "Rusher_ID_Name"))
+                     by = c("Player_ID_Name" = "Rusher_ID_Name")) %>%
+    dplyr::mutate(AdjNetYardsAtt = (Pass_Yards_Gained + 20 * Pass_TDs - 45 * INTs + Sack_Yards_Lost) / (Pass_Attempts + Sacks))
   model_data_list$QB_table[is.na(model_data_list$QB_table)] <- 0
 
   # Expression for the non-QB tables:
@@ -126,6 +127,7 @@ calc_passing_splits <- function(pass_pbp, splits = "Passer_ID_Name") {
                      TD_per_Drive = Pass_TDs / Pass_Drives,
                      Air_TD_per_Drive = Air_TDs / Pass_Drives,
                      INTs_per_Att = INTs / Pass_Attempts,
+                     Passer_Rating = ((((Comp_Perc - .3)*5) + ((Yards_per_Att - 3)*.25) + (TD_per_Att*20) + (2.375 - (INTs_per_Att * 25))) / 6) * 100,
                      INTs_per_Comp = INTs / Completions,
                      INTs_per_Drive = INTs / Pass_Drives,
                      Pass_EPA = sum(EPA, na.rm = TRUE),
