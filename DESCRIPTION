@@ -6,8 +6,7 @@ Maintainer: Ron Yurko <ryurko21@gmail.com>
 Description: Using publicly available data with nflscrapR, this packages computes
     WAR for offensive position players in the NFL.
 Depends: R (>= 3.3.1),
-         magrittr,
-         ggplot2
+         magrittr
 Imports: dplyr,
          purrr,
          readr,
