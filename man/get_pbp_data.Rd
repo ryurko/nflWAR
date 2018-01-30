@@ -4,13 +4,10 @@
 \alias{get_pbp_data}
 \title{Retrieves nflscrapR Play-by-Play Data}
 \usage{
-get_pbp_data(years, live = FALSE)
+get_pbp_data(years)
 }
 \arguments{
 \item{years}{Single number or vector of years to get play-by-data for.}
-
-\item{live}{Indicator for whether or not to scrape the data or access
-saved files on github. Defaults to FALSE.}
 }
 \value{
 Data frame of the play-by-play for the given year(s).

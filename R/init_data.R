@@ -1,15 +1,13 @@
 #' Retrieves nflscrapR Play-by-Play Data
 #'
 #' @param years Single number or vector of years to get play-by-data for.
-#' @param live Indicator for whether or not to scrape the data or access
-#'             saved files on github. Defaults to FALSE.
 #' @return Data frame of the play-by-play for the given year(s).
 #' @examples
 #' # Get data from 2009 to 2016:
 #' pbp_df <- get_pbp_data(c(2009:2016))
 #' @export
 
-get_pbp_data <- function(years, live = FALSE) {
+get_pbp_data <- function(years) {
   purrr::map_dfr(years, function(x) {
     suppressMessages(readr::read_csv(paste("https://raw.github.com/ryurko/nflscrapR-data/master/data/season_play_by_play/pbp_",
                            x, ".csv", sep = "")))

@@ -25,7 +25,6 @@
 #' measure_meta_reliability(qb_boot_seasons,qb_seasons,
 #' "Player_ID_Name", "Season", "Total_Plays", 100,
 #' c("total_WAR", "Comp_Perc", "Success_Rate"))
-#' @export
 
 measure_meta_reliability <- function(boot_seasons, stat_seasons,
                                      player_col, season_col, attempt_col,
@@ -112,7 +111,6 @@ measure_meta_reliability <- function(boot_seasons, stat_seasons,
 #' @examples
 #' qb_independence <- measure_meta_independence(qb_seasons,
 #' "Total_Plays", 100, c("total_WAR", "Comp_Perc", "Success_Rate"))
-#' @export
 
 measure_meta_independence <- function(stat_seasons, attempt_col,
                                       min_attempts, stat_cols) {
