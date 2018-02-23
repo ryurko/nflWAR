@@ -1,38 +1,38 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
 
 # nflWAR
 
 ## A Reproducible Method for Offensive Player Evaluation in Football
 
-This package is designed to implement the estimation of [Wins Above
-Replacement](https://en.wikipedia.org/wiki/Wins_Above_Replacement) for
-offensive skill position players in the NFL based on the methodology
-described in our paper, available on the
-[arXiv](https://arxiv.org/abs/1802.00998).
+This package is designed to implement the estimation of [Wins Above Replacement](https://en.wikipedia.org/wiki/Wins_Above_Replacement) for offensive skill position players in the NFL based on the methodology described in our paper, available on the [arXiv](https://arxiv.org/abs/1802.00998).
 
 ## Installation
 
 You can install `nflWAR` from github with:
 
-``` r
+```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
 devtools::install_github("ryurko/nflWAR")
 ```
 
 ## Replacement Level Definitions
 
-We first create the replacement level definitions using the
-`create_percentage_replacement_fn` and `create_league_replacement_fn`
-functions. These will give us functions to find replacement level
-performances for each position. The example below creates a function to
-return the replacement level QBs based on the ten percent cutoff
-described in the paper, while the other positions are merely defined
-based on the attempts.
+We first create the replacement level definitions using the `create_percentage_replacement_fn` and `create_league_replacement_fn` functions. These will give us functions to find replacement level performances for each position. The example below creates a function to return the replacement level QBs based on the ten percent cutoff described in the paper, while the other positions are merely defined based on the attempts.
 
-``` r
+```{r rep_ex}
 library(nflWAR)
-#> Loading required package: magrittr
 league_replacement_functions <- list("find_replacement_QB" = create_percentage_replacement_fn("Perc_Total_Plays", .1),
                                      "find_replacement_RB_rec" = create_league_replacement_fn(3, "RB", "Targets"), 
                                      "find_replacement_WR_rec" = create_league_replacement_fn(4, "WR", "Targets"),
@@ -46,10 +46,9 @@ league_replacement_functions <- list("find_replacement_QB" = create_percentage_r
 
 ## Model Formulas
 
-Next we initialize the two different formula lists: (1) Expected Points
-Added based WAR and (2) Win Probability Added based WAR:
+Next we initialize the two different formula lists: (1) Expected Points Added based WAR and (2) Win Probability Added based WAR:
 
-``` r
+```{r models}
 # Create the expected points based modula formulas:
 ep_model_formula_list <- list("air_formula" = as.formula(airEPA_Result ~ Home_Ind + Shotgun_Ind + No_Huddle_Ind + QBHit + 
                                                            Receiver_Position + PassLocation + Rush_EPA_Att +
@@ -75,16 +74,14 @@ wp_model_formula_list <- list("air_formula" = as.formula(airWPA_Result ~ Home_In
                               "main_rush_formula" = as.formula(WPA ~ Home_Ind + Shotgun_Ind + No_Huddle_Ind + 
                                                                  Rusher_Position + Pass_EPA_Att +
                                                                  (1|Team_Side_Gap) + (1|Rusher_ID_Name) + (1|DefensiveTeam)))
+
 ```
 
 ## WAR Pipeline
 
-The code below demonstrates the `nflWAR` pipeline for both types of WAR
-estimates to generate the results in our paper. This pipeline is
-intended to be modular and will continue to be improved with package
-development.
+The code below demonstrates the `nflWAR` pipeline for both types of WAR estimates to generate the results in our paper. This pipeline is intended to be modular and will continue to be improved with package development.
 
-``` r
+```{r war, eval = FALSE}
 # Just a good idea to install the tidyverse if you don't have it, we use purrr for below:
 # install.packages("tidyverse")
 library(tidyverse)
@@ -125,15 +122,14 @@ walk(c(2009:2017), function(x) {
   
   saveRDS(season_results, file = paste("epa_model_results_", as.character(x), ".rds", sep = ""))
 })
+
 ```
 
 ## Simulations
 
-The following code demonstrates how the simulations were conducted in
-the paper, note this can take quite some time to run. Will improve
-example below later on for runtime enhancements.
+The following code demonstrates how the simulations were conducted in the paper, note this can take quite some time to run. Will improve example below later on for runtime enhancements.
 
-``` r
+```{r sims, eval=FALSE}
 # Create simulation results for each year with the appropriate
 # pipeline that relies on the already found replacement level
 # players, doing so for the WPA based model (and other typical
@@ -167,4 +163,7 @@ walk(c(2009:2017), function(x) {
   saveRDS(sim_results, file = paste("wpa_model_play_sim_results_", as.character(x), ".rds", sep = ""))
   print(paste("Finished simulation for year ", as.character(x), sep = ""))
 })
+
 ```
+
+
