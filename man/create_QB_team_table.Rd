@@ -2,7 +2,7 @@
 % Please edit documentation in R/replacement_level_functions.R
 \name{create_QB_team_table}
 \alias{create_QB_team_table}
-\title{Create QB Table Stats with Team Information}
+\title{Create QB table stats with team information}
 \usage{
 create_QB_team_table(model_data_list)
 }
@@ -23,7 +23,7 @@ level that also includes the player's number and percentage of different attempt
 respect to their team.
 }
 \description{
-Create QB Table Stats with Team Information
+Create QB table stats with team information
 }
 \examples{
 # Create the QB team table:

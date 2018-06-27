@@ -1,4 +1,4 @@
-#' Creates Player Tables for Each Position
+#' Creates player tables for each position
 #'
 #' @param model_data_list List of two data frames (1) passing
 #' play-by-play (pass_model_df) and (2) rushing play-by-play
@@ -118,7 +118,7 @@ add_position_tables <- function(model_data_list) {
     return
 }
 
-#' Find Replacement Level for Each Position
+#' Find replacement level for each position
 #'
 #' @param model_data_list List of data frames:
 #' \itemize{
@@ -223,7 +223,7 @@ find_positional_replacement_level <- function(model_data_list,
   return(model_data_list)
 }
 
-#' Create a Function to Find Replacement Level Based on the Team's Depth
+#' Create a function to find replacement level based on the team's depth
 #'
 #' @param replacement_depth Number indicating which rank on team's depth chart the
 #' replacement level can at most be.
@@ -304,7 +304,7 @@ create_roster_replacement_fn <- function(replacement_depth, positions, pbp_type)
   return(replacement_function)
 }
 
-#' Create a Function to Find Replacement Level Based on League Attempts
+#' Create a function to find replacement level based on league attempts
 #'
 #' @param replacement_depth Number indicating how many players of that position
 #' and performance type each team should have, then every player have that will
@@ -390,7 +390,7 @@ create_league_replacement_fn <- function(replacement_depth, positions, attempt_t
 }
 
 
-#' Create QB Table Stats with Team Information
+#' Create QB table stats with team information
 #'
 #' @param model_data_list List of data frames:
 #' \itemize{
@@ -457,7 +457,7 @@ create_QB_team_table <- function(model_data_list) {
     return
 }
 
-#' Create non-QB Table Stats with Team Information
+#' Create non-QB table stats with team information
 #'
 #' @param model_data_list List of data frames:
 #' \itemize{
@@ -540,7 +540,7 @@ create_pos_team_table <- function(model_data_list, position) {
 
 
 
-#' Find Replacement-Level QBs based on the Percentage of Plays Cutoff
+#' Find replacement-level QBs based on the percentage of plays cutoff
 #'
 #' @param qb_team_table Data frame with QB attempts in relation to their team
 #' @param attempt_type String indicating which type of attempts to use from the table
@@ -549,7 +549,6 @@ create_pos_team_table <- function(model_data_list, position) {
 #' that serves as a cutoff for replacement level.
 #' @return Vector of Player_ID_Name values indicating the replacement level
 #' QBs given the inputs.
-#' replacement level for the position given the league replacement_depth and attempt_type.
 #' @examples
 #' # Find the replacement level QBs based on 10% cutoff for Total_Plays:
 #' replacement_QBs <- find_percentage_replacement_QB(model_data_list, "Total_Plays", .1)
@@ -577,7 +576,7 @@ find_percentage_replacement_QB <- function(qb_team_table, attempt_type, attempt_
     return
 }
 
-#' Creates Function to Find Percentage Based Replacement Level QBs
+#' Creates function to find percentage based replacement level QBs
 #'
 #' @param attempt_type String indicating which type of attempts to use from the table
 #' to use for the percent cutoff, can be the following options: (1) Perc_Pass_Attempts,
@@ -601,7 +600,56 @@ create_percentage_replacement_fn <- function(attempt_type, attempt_percent) {
   return(replacement_function)
 }
 
-#' Add Replacement Level Information to Simulation Data
+#' Find replacement-level QBs based on the first game of the season for each team
+#'
+#' @param model_data_list List of data frames:
+#' \itemize{
+#' \item{"pass_model_df"} - Passing play-by-play data
+#' \item{"rush_model_df"} - Rushing play-by-play data
+#' \item{"QB_table"} - Table of QBs
+#' \item{"RB_table"} - Table of RBs
+#' \item{"WR_table"} - Table of WRs
+#' \item{"TE_table"} - Table of TEs
+#' }
+#' @return Vector of Player_ID_Name values indicating the replacement level
+#' QBs given the input.
+#' @examples
+#' # Find the replacement level QBs by asssuming all QBs that threw the first
+#' # pass in the first game of the season are NFL level while all other QBs are
+#' # replacement level:
+#' replacement_QBs <- find_game_one_replacement_QB(model_data_list)
+#' @export
+
+find_game_one_replacement_QB <- function(model_data_list) {
+
+  # Vector of teams:
+  teams <- unique(model_data_list$pass_model_df$posteam)
+
+  # For each team find the QBs that played in the first quarter
+  # of the first game for each team:
+  first_qbs <- purrr::map_chr(teams, function(x) {
+    model_data_list$pass_model_df %>%
+      dplyr::filter(posteam == x, qtr == 1) %>%
+      dplyr::arrange(desc(GameID), desc(TimeSecs)) %>%
+      dplyr::group_by(GameID) %>%
+      dplyr::summarise(first_qb = dplyr::first(Passer_ID_Name)) %>%
+      dplyr::slice(1) %>%
+      dplyr::pull(first_qb)
+  })
+
+  # Now the QBs that didn't play first are replacement level:
+  purrr::map(teams, function(x) {
+    model_data_list$pass_model_df %>%
+      dplyr::filter(posteam == x, !(Passer_ID_Name %in% first_qbs)) %>%
+      dplyr::select(Passer_ID_Name) %>%
+      dplyr::distinct(Passer_ID_Name) %>%
+      dplyr::pull(Passer_ID_Name)
+  }) %>%
+    purrr::flatten_chr()
+}
+
+
+#' Add replacement level information to simulation data
 #'
 #' @param sim_data_list List of data frames in the simulation:
 #' \itemize{

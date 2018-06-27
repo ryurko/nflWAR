@@ -2,7 +2,7 @@
 % Please edit documentation in R/replacement_level_functions.R
 \name{find_positional_replacement_level}
 \alias{find_positional_replacement_level}
-\title{Find Replacement Level for Each Position}
+\title{Find replacement level for each position}
 \usage{
 find_positional_replacement_level(model_data_list, replacement_fns)
 }
@@ -41,7 +41,7 @@ positional tables indicating which players are replacement
 level.
 }
 \description{
-Find Replacement Level for Each Position
+Find replacement level for each position
 }
 \examples{
 # Find positional replacement level:

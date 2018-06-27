@@ -2,7 +2,7 @@
 % Please edit documentation in R/replacement_level_functions.R
 \name{add_replacement_level_sim}
 \alias{add_replacement_level_sim}
-\title{Add Replacement Level Information to Simulation Data}
+\title{Add replacement level information to simulation data}
 \usage{
 add_replacement_level_sim(sim_data_list, replacement_tables)
 }
@@ -34,7 +34,7 @@ positional tables indicating which players are replacement
 level.
 }
 \description{
-Add Replacement Level Information to Simulation Data
+Add replacement level information to simulation data
 }
 \examples{
 # Join positional replacement level information from

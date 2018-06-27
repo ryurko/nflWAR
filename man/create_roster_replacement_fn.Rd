@@ -2,7 +2,7 @@
 % Please edit documentation in R/replacement_level_functions.R
 \name{create_roster_replacement_fn}
 \alias{create_roster_replacement_fn}
-\title{Create a Function to Find Replacement Level Based on the Team's Depth}
+\title{Create a function to find replacement level based on the team's depth}
 \usage{
 create_roster_replacement_fn(replacement_depth, positions, pbp_type)
 }
@@ -23,7 +23,7 @@ decide the team depth chart cutoff, as well as the position(s) to search for,
 and the type of the play-by-play data that will be used.
 }
 \description{
-Create a Function to Find Replacement Level Based on the Team's Depth
+Create a function to find replacement level based on the team's depth
 }
 \examples{
 # Create the replacement function for QBs using based on 3rd or higher on the

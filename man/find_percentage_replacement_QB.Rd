@@ -2,7 +2,7 @@
 % Please edit documentation in R/replacement_level_functions.R
 \name{find_percentage_replacement_QB}
 \alias{find_percentage_replacement_QB}
-\title{Find Replacement-Level QBs based on the Percentage of Plays Cutoff}
+\title{Find replacement-level QBs based on the percentage of plays cutoff}
 \usage{
 find_percentage_replacement_QB(qb_team_table, attempt_type, attempt_percent)
 }
@@ -18,10 +18,9 @@ that serves as a cutoff for replacement level.}
 \value{
 Vector of Player_ID_Name values indicating the replacement level
 QBs given the inputs.
-replacement level for the position given the league replacement_depth and attempt_type.
 }
 \description{
-Find Replacement-Level QBs based on the Percentage of Plays Cutoff
+Find replacement-level QBs based on the percentage of plays cutoff
 }
 \examples{
 # Find the replacement level QBs based on 10\% cutoff for Total_Plays:

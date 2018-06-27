@@ -2,7 +2,7 @@
 % Please edit documentation in R/replacement_level_functions.R
 \name{add_position_tables}
 \alias{add_position_tables}
-\title{Creates Player Tables for Each Position}
+\title{Creates player tables for each position}
 \usage{
 add_position_tables(model_data_list)
 }
@@ -18,7 +18,7 @@ player names/IDs along with their respective number of
 attempts for both passing/receiving and rushing/sacks.
 }
 \description{
-Creates Player Tables for Each Position
+Creates player tables for each position
 }
 \examples{
 # Add the player tables to the model_data_list:

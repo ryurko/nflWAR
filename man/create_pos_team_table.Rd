@@ -2,7 +2,7 @@
 % Please edit documentation in R/replacement_level_functions.R
 \name{create_pos_team_table}
 \alias{create_pos_team_table}
-\title{Create non-QB Table Stats with Team Information}
+\title{Create non-QB table stats with team information}
 \usage{
 create_pos_team_table(model_data_list, position)
 }
@@ -26,7 +26,7 @@ level that also includes the player's number and percentage of different attempt
 respect to their team.
 }
 \description{
-Create non-QB Table Stats with Team Information
+Create non-QB table stats with team information
 }
 \examples{
 # Create the RB team table:

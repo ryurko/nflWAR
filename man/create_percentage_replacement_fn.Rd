@@ -2,7 +2,7 @@
 % Please edit documentation in R/replacement_level_functions.R
 \name{create_percentage_replacement_fn}
 \alias{create_percentage_replacement_fn}
-\title{Creates Function to Find Percentage Based Replacement Level QBs}
+\title{Creates function to find percentage based replacement level QBs}
 \usage{
 create_percentage_replacement_fn(attempt_type, attempt_percent)
 }
@@ -19,7 +19,7 @@ Function that only takes in the model_data_list and returns the
 replacement level QBs.
 }
 \description{
-Creates Function to Find Percentage Based Replacement Level QBs
+Creates function to find percentage based replacement level QBs
 }
 \examples{
 # First create the function to find the replacement QBs based on "Perc_Total_Plays"

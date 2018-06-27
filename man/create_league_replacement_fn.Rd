@@ -2,7 +2,7 @@
 % Please edit documentation in R/replacement_level_functions.R
 \name{create_league_replacement_fn}
 \alias{create_league_replacement_fn}
-\title{Create a Function to Find Replacement Level Based on League Attempts}
+\title{Create a function to find replacement level based on league attempts}
 \usage{
 create_league_replacement_fn(replacement_depth, positions, attempt_type,
   combine_wrte = 0)
@@ -26,7 +26,7 @@ Function that returns a vector of Player_ID_Name values indicating the
 replacement level for the position given the league replacement_depth and attempt_type.
 }
 \description{
-Create a Function to Find Replacement Level Based on League Attempts
+Create a function to find replacement level based on league attempts
 }
 \examples{
 # Create the replacement function for RBs by stating every team has 3 RBs on their
