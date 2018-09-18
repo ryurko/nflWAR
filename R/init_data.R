@@ -9,7 +9,7 @@
 
 get_pbp_data <- function(years) {
   purrr::map_dfr(years, function(x) {
-    suppressMessages(readr::read_csv(paste("https://raw.github.com/ryurko/nflscrapR-data/master/data/season_play_by_play/pbp_",
+    suppressMessages(readr::read_csv(paste("https://raw.github.com/ryurko/nflscrapR-data/master/legacy_data/season_play_by_play/pbp_",
                            x, ".csv", sep = "")))
     }) %>% return
 }
@@ -96,7 +96,7 @@ add_positions <- function(pbp_df, years) {
   # (which are already filtered down to only the offense skill positions),
   # selecting only the position and ID columns:
   player_positions <- purrr::map_dfr(years, function(x) {
-    suppressMessages(readr::read_csv(paste("https://raw.github.com/ryurko/nflscrapR-data/master/data/team_rosters/team_",
+    suppressMessages(readr::read_csv(paste("https://raw.github.com/ryurko/nflscrapR-data/master/legacy_data/team_rosters/team_",
                                            x, "_rosters.csv", sep = "")))
     }) %>%
     dplyr::select(GSIS_ID, Pos) %>%
@@ -242,7 +242,7 @@ get_season_summary <- function(years) {
   # Create a data frame with the games data frames for the
   # given years from the nflscrapR-data repository:
   games_df <- purrr::map_dfr(years, function(x) {
-    suppressMessages(readr::read_csv(paste("https://raw.github.com/ryurko/nflscrapR-data/master/data/season_games/games_",
+    suppressMessages(readr::read_csv(paste("https://raw.github.com/ryurko/nflscrapR-data/master/legacy_data/season_games/games_",
                                            x, ".csv", sep = "")))
   })
 
